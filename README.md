@@ -41,6 +41,6 @@ Poll(<array_of_request_keys>, <api_host>) PollResponse
 
 ## TODOS
 
-- [] Key generation and manipulation functions
+- [ ] Key generation and manipulation functions
 - [x] Create wallet Kadena blockchain
 - [ ] Other expected features for blockchain library
