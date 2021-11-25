@@ -7,6 +7,13 @@ const (
 	ETH     Scheme = "ETH"
 )
 
+type CmdType int
+
+const (
+	EXEC CmdType = iota
+	CONT
+)
+
 type Meta struct {
 	ChainId      string  `json:"chainId"`
 	Sender       string  `json:"sender"`
@@ -67,9 +74,23 @@ type Command struct {
 	Sigs []Sig  `json:"sigs"`
 }
 
+type SendCommand struct {
+	Cmds []Command `json:"cmds,omitempty"`
+}
+
+type SPVCommand struct {
+	RequestKey    string `json:"requestKey"`
+	TargetChainId string `json:"targetChainId"`
+}
+
 type PactEvents struct {
 	Name       string      `json:"name,omitempty"`
 	Params     interface{} `json:"params,omitempty"`
 	Module     string      `json:"module,omitempty"`
 	ModuleHash string      `json:"moduleHash,omitempty"`
+}
+
+type Result struct {
+	Status string      `json:"status,omitempty"`
+	Data   interface{} `json:"data,omitempty"`
 }

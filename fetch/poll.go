@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/jfamousket/go-kadena/common"
+	"github.com/jfamousket/go-kadena/helpers"
 )
 
 type Request struct {
@@ -29,28 +28,23 @@ type RequestKeys struct {
 	RequestKeys []string `json:"requestKeys,omitempty"`
 }
 
-func Poll(requestKeys []string) (*PollResponse, error) {
-	postBody, err := json.Marshal(RequestKeys{RequestKeys: requestKeys})
-	if err != nil {
-		log.Fatalln(err)
-	}
-	resBody := bytes.NewBuffer(postBody)
-	resp, err := http.Post(fmt.Sprintf("%s/api/v1/poll", common.TEST_PACT_URL), "application/json", resBody)
-	if err != nil {
-		log.Fatalf("An error occurred %+v", err)
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("An error occurred %+v", err)
-	}
-	if resp.StatusCode == http.StatusOK {
-		var ret PollResponse
-		err = json.Unmarshal(body, &ret)
-		if err != nil {
-			log.Fatalf("An error occurred %+v", err)
+func Poll(requestKeys []string, apiHost string) (res *PollResponse, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(common.Error)
 		}
-		return &ret, nil
-	}
-	return nil, fmt.Errorf("%v", body)
+	}()
+	postBody, err := json.Marshal(RequestKeys{RequestKeys: requestKeys})
+	helpers.EnforceNoError(err)
+	req := bytes.NewBuffer(postBody)
+	resp, err := http.Post(
+		fmt.Sprintf("%s/api/v1/poll", apiHost),
+		"application/json",
+		req,
+	)
+	helpers.EnforceNoError(err)
+	defer resp.Body.Close()
+	err = helpers.UnMarshalBody(resp, res)
+	helpers.EnforceNoError(err)
+	return
 }
